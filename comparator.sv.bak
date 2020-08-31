@@ -1,0 +1,5 @@
+module comparator(input [15:0]term,[7:0]y,output Mout);
+
+assign Mout=term < {8'b0,y};
+
+endmodule

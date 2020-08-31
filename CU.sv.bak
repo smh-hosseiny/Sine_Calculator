@@ -1,0 +1,71 @@
+`timescale 1ns/1ns
+module CU(input clk,rst,compared,start,output initTerm,initS,ldx,ldterm,ldy,ldS,sel_Mul,sel_term,AorS,ready);
+
+logic [2:0]cnt;logic cout,cen,Initc;
+
+typedef enum{Idle,Init,Load,M1,M2,M3,compare,AddorSub} states;
+states p_state,n_state; 
+
+always @(start,p_state,cout) begin
+
+n_state = Idle;
+{initc,initTerm,initS,ldx,ldterm,ldy,ldS,Cen,sel_Mul,sel_term,AorS,ready}=12'b0;
+
+
+case(p_state)
+
+ Idle : begin
+ n_state=start ? Init : Idle;  ready=1;
+ end
+ 
+ 
+ Init : begin
+ n_state=start ? Init : Loading; initc=1;initS=1;initTerm=1;
+ end
+ 
+ 
+ Loading : begin
+ n_state=M1;              ldx=1;ldy=1;
+ end
+ 
+ M1 :  begin 
+ n_state=M2;          Ldterm=1;sel_Mul=1;cen=1;
+ end
+ 
+ 
+ M2 : begin           ldterm=1;sel_Mul=1;
+ n_state=M3;
+end
+
+
+M3 : begin           ldterm=1;sel_Mul=0;
+n_state=compare;
+end
+
+
+compare : begin
+n_state=(compared) ? idle : AddorSub;
+end
+
+
+AddorSub : begin
+n_state=(cout) ? idle : M1 ;      ldS=1;
+end
+
+ always@(posedge clk,posedge rst) begin
+ if(rst) p_state <=Idle; else 
+ p_state <=n_state;
+ end 
+ endcase
+  
+  
+always @(posedge clk,posedge rst) begin
+  if(rst) cnt <=3'b000; else begin
+    if(Initc) cnt <=3'b000; else
+      if(cen) cnt <= cnt + 1 	;
+      end
+   end
+   assign cout=&cnt;
+ 
+ 
+ endmodule

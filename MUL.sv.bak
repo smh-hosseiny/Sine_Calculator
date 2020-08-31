@@ -1,0 +1,3 @@
+module MUL(input [15:0]M1,M2,output [15:0]Mresult);
+assign Mresult=M1*M2;
+endmodule
